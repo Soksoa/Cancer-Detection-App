@@ -1,40 +1,30 @@
-import { View, Image, StyleSheet } from "react-native";
-import Welcome from "./components/Welcome";
-import Footer from "./components/Footer";
-import SendButton from "./components/SendButton";
-import ImageButtons from "./components/ImageButtons";
-import { useState } from "react";
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import MyStack from './components/scripts/Navigation';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { useCallback } from 'react';
 
 export default function App() {
-  const [image, setImage] = useState(null);
-  const [prediction, setPrediction] = useState(null);
-  console.log(image);
+  const [fontsLoaded, fontError] = useFonts({
+    'Lato-Regular': require('./assets/fonts/Lato-Regular.ttf'),
+    'Lato-Bold': require('./assets/fonts/Lato-Bold.ttf')
+  });
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ justifyContent: "space-around" }}>
-        {image ? (
-          <View>
-            <SendButton image={image} prediction={prediction} setPrediction={setPrediction} />
-            {prediction ? 
-              <View><Text>{prediction}</Text></View>:
-              <Image source={{ uri: image }} style={styles.image} />
-            }
-          </View>
-        ) : (
-          <Welcome />
-        )}
-        <ImageButtons image={image} setImage={setImage} />
-      </View>
-      <Footer />
-    </View>
+    <NavigationContainer onLayout={onLayoutRootView}>
+      <MyStack />
+      <StatusBar style='auto' />
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    marginTop: 200,
-    marginLeft: 6,
-    width: 400,
-    height: 400,
-  },
-});
